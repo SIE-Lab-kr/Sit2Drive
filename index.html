@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CARLA Accident Recordings — Dataset Explorer</title>
+  <meta name="description" content="Browse and understand the CARLA accident recordings dataset. View structure, stats, and inline video examples." />
+  <style>
+    :root{
+      --bg:#0b0c10;--panel:#111319;--panel-2:#151826;--text:#e8ecf1;--muted:#b5bfd1;--brand:#6aa9ff;--accent:#8bffcd;--warn:#ffcc6a;
+      --radius:16px;--shadow:0 10px 30px rgba(0,0,0,.3)
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;line-height:1.5;background:linear-gradient(180deg,#0a0b10,#0c0f17 40%,#0b0c10);
+      color:var(--text)}
+    a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
+    header{position:sticky;top:0;background:rgba(10,12,16,.7);backdrop-filter:blur(10px);z-index:50;border-bottom:1px solid #1d2230}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center}
+    .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid #1b2130;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+    .title{font-size:clamp(22px,3vw,36px);margin:8px 0 6px}
+    .subtitle{color:var(--muted);margin:0}
+    .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#0f1422;border:1px solid #212a42;font-size:12px;color:var(--muted)}
+    .grid{display:grid;gap:16px}
+    .grid.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .grid.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}.grid.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.gallery{grid-template-columns:1fr}}
+
+    .stat{padding:14px}
+    .stat .n{font-size:24px;font-weight:700}
+    .stat .k{color:var(--muted);font-size:12px}
+
+    .controls{display:flex;flex-wrap:wrap;gap:10px}
+    .chip{border:1px solid #22304a;background:#0f1524;padding:8px 10px;border-radius:10px;color:var(--text);cursor:pointer}
+    select, input[type="search"]{background:#0e1321;color:var(--text);border:1px solid #22304a;border-radius:10px;padding:10px}
+
+    details{border:1px dashed #28324b;border-radius:12px;padding:12px}
+    details > summary{cursor:pointer;color:var(--muted)}
+
+    pre{background:#0e1321;border:1px solid #1d2740;border-radius:12px;padding:12px;overflow:auto}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px}
+
+    .rec{display:grid;grid-template-columns:220px 1fr;gap:14px}
+    @media (max-width:700px){.rec{grid-template-columns:1fr}}
+    .rec-aside{display:flex;flex-direction:column;gap:8px}
+    .rec h3{margin:0 0 4px}
+    .pill{display:inline-flex;align-items:center;gap:6px;background:#0f1a2a;border:1px solid #20304d;color:var(--muted);font-size:11px;border-radius:999px;padding:5px 8px}
+
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .tab{padding:6px 10px;border-radius:999px;border:1px solid #263552;background:#0e1321;color:var(--muted);cursor:pointer}
+    .tab.active{background:#1a2440;color:var(--text);border-color:#37528a}
+
+    video{width:100%;border-radius:12px;border:1px solid #192744;background:#0a0e17}
+
+    footer{color:#99a4b7;padding:40px 0}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge">Dataset Explorer</span>
+        <strong id="ds-title">CARLA Accident Recordings</strong>
+      </div>
+      <div class="controls">
+        <input id="search" type="search" placeholder="Search REC id or note…" />
+        <select id="cameraFilter" title="Camera">
+          <option value="all">All cameras</option>
+        </select>
+        <select id="categoryFilter" title="Category">
+          <option value="camera">camera (RGB)</option>
+          <option value="semseg">semseg</option>
+          <option value="overlays">overlays</option>
+        </select>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap" style="display:grid;gap:16px">
+    <section class="hero">
+      <div class="card">
+        <h1 class="title" id="hero-title">CARLA Accident Recordings</h1>
+        <p class="subtitle" id="hero-desc">A small sample dataset recorded in CARLA with multi-camera views (front, front_left, front_right), semantic segmentation, and optional overlay renders. Explore the structure, stats, and watch inline examples.</p>
+        <div style="height:10px"></div>
+        <div class="grid stats">
+          <div class="card stat"><div class="n" id="n-recs">–</div><div class="k">recordings</div></div>
+          <div class="card stat"><div class="n" id="n-cams">–</div><div class="k">cameras</div></div>
+          <div class="card stat"><div class="n" id="n-events">–</div><div class="k">events files</div></div>
+          <div class="card stat"><div class="n" id="n-size">–</div><div class="k">media files (linked)</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2 style="margin:0 0 8px">Folder structure</h2>
+        <p class="subtitle">What your pipeline expects per <code>REC_*</code> (from your <code>make_recording_folders.py</code> script)</p>
+        <pre><code id="tree-code">REC_#/ 
+  videos/
+    camera/
+    semseg/
+    overlays/           # optional render outputs
+  json/
+    semseg_objects/
+      front/
+      front_left/
+      front_right/
+  summaries/
+    front/
+    front_left/
+    front_right/
+    (session-level files)
+  events/
+  frames.jsonl
+  signals_and_intersections.json
+</code></pre>
+        <details>
+          <summary>Manifest schema used by this site</summary>
+<pre><code>{
+  "dataset_title": "CARLA Accident Recordings",
+  "description": "...",
+  "cameras": ["front", "front_left", "front_right"],
+  "recordings": [
+    {
+      "id": "REC_1",
+      "date": "2025-08-01",
+      "notes": "optional",
+      "events_count": 0,
+      "videos": {
+        "camera": {"front": "media/REC_1/camera/front.mp4", "front_left": "…", "front_right": "…"},
+        "semseg": {"front": "…"},
+        "overlays": {"front": "…"}
+      }
+    }
+  ]
+}</code></pre>
+        </details>
+      </div>
+    </section>
+
+    <section class="card">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <h2 style="margin:0">Recordings</h2>
+        <span class="badge" id="active-filters">All cameras • camera</span>
+      </div>
+      <div class="grid gallery" id="gallery"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 6px">About this dataset</h2>
+      <p id="about">
+        These recordings are organized for a perception pipeline: RGB camera videos in <code>videos/camera</code>, semantic segmentation videos in <code>videos/semseg</code>, and optional render outputs in <code>videos/overlays</code>. Per-camera JSON object tracks are under <code>json/semseg_objects/&lt;camera&gt;</code>. Summaries exist per camera and at session level. The site reads a simple JSON manifest to display examples inline.
+      </p>
+      <ul>
+        <li><strong>Tip:</strong> keep web examples small (≤ ~50 MB per file). Use <code>preload="metadata"</code> on videos for snappy loads.</li>
+        <li><strong>GitHub Pages:</strong> put this <code>index.html</code> and your <code>data_manifest.json</code> in <code>/docs</code> of your repo; enable Pages → "Deploy from a branch" → <code>main</code> / <code>docs</code>.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    Built as a single-file static site. You can customize text via <code>data_manifest.json</code>.
+  </footer>
+
+  <script>
+    const qs = (s, el=document)=>el.querySelector(s);
+    const qsa = (s, el=document)=>Array.from(el.querySelectorAll(s));
+
+    const DEFAULT_MANIFEST = {
+      dataset_title: "CARLA Accident Recordings",
+      description: "Sample viewer for CARLA accident recordings with multi-camera videos.",
+      cameras: ["front","front_left","front_right"],
+      recordings: [
+        {
+          id: "REC_DEMO_1", date: "2025-08-01", notes: "demo entry",
+          events_count: 0,
+          videos: {
+            camera: {
+              front: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            },
+            semseg: {}, overlays: {}
+          }
+        },
+        {
+          id: "REC_DEMO_2", date: "2025-08-02", notes: "demo entry",
+          events_count: 0,
+          videos: {
+            camera: {
+              front: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+            }, semseg: {}, overlays: {}
+          }
+        }
+      ]
+    };
+
+    const manifestURL = new URLSearchParams(location.search).get('manifest') || 'data_manifest.json';
+
+    async function loadManifest(){
+      try{
+        const res = await fetch(manifestURL, {cache:'no-store'});
+        if(!res.ok) throw new Error('No manifest');
+        return await res.json();
+      }catch(e){
+        console.warn('Falling back to default manifest:', e);
+        return DEFAULT_MANIFEST;
+      }
+    }
+
+    function setStats(data){
+      qs('#ds-title').textContent = data.dataset_title || 'Dataset Explorer';
+      qs('#hero-title').textContent = data.dataset_title || 'Dataset Explorer';
+      qs('#hero-desc').textContent = data.description || qs('#hero-desc').textContent;
+      qs('#about').textContent = data.about || qs('#about').textContent;
+
+      const nRecs = data.recordings?.length || 0;
+      const cameras = data.cameras || [];
+      const nEvents = data.recordings?.reduce((a,r)=>a+(r.events_count||0),0) || 0;
+      const nMedia = data.recordings?.reduce((a,r)=>{
+        const v = r.videos || {}; let c=0;
+        Object.values(v).forEach(map=>{ if(map && typeof map === 'object') c += Object.values(map).filter(Boolean).length });
+        return a + c;
+      },0) || 0;
+
+      qs('#n-recs').textContent = nRecs;
+      qs('#n-cams').textContent = cameras.length || '–';
+      qs('#n-events').textContent = nEvents;
+      qs('#n-size').textContent = nMedia;
+
+      // camera filter options
+      const sel = qs('#cameraFilter');
+      sel.innerHTML = '<option value="all">All cameras</option>' + cameras.map(c=>`<option value="${c}">${c}</option>`).join('');
+    }
+
+    function videoSrcFor(rec, category, camera){
+      return rec?.videos?.[category]?.[camera] || '';
+    }
+
+    function renderGallery(data){
+      const gallery = qs('#gallery');
+      gallery.innerHTML = '';
+      const searchTerm = qs('#search').value.trim().toLowerCase();
+      const camFilter = qs('#cameraFilter').value;
+      const catFilter = qs('#categoryFilter').value;
+      qs('#active-filters').textContent = `${camFilter==='all'?'All cameras':camFilter} • ${catFilter}`;
+
+      data.recordings
+        .filter(r => !searchTerm || (r.id?.toLowerCase().includes(searchTerm) || r.notes?.toLowerCase().includes(searchTerm)))
+        .forEach(rec => {
+          const cameras = camFilter==='all' ? (data.cameras || []) : [camFilter];
+
+          // pick first available camera with a source for this category to show by default
+          let activeCam = cameras.find(c => videoSrcFor(rec, catFilter, c)) || cameras[0] || '';
+
+          const card = document.createElement('div');
+          card.className = 'card rec';
+          card.innerHTML = `
+            <aside class="rec-aside">
+              <h3>${rec.id}</h3>
+              <span class="pill">${rec.date || ''}</span>
+              <span class="pill">events: ${rec.events_count ?? '–'}</span>
+              ${rec.notes ? `<span class="pill" title="notes">${rec.notes}</span>`: ''}
+              <div class="tabs cams"></div>
+            </aside>
+            <div>
+              <div class="tabs cats">
+                ${['camera','semseg','overlays'].map(cat=>`
+                  <button class="tab ${cat===catFilter?'active':''}" data-cat="${cat}">${cat}</button>
+                `).join('')}
+              </div>
+              <div class="player"></div>
+            </div>`;
+
+          const tabsCams = qs('.tabs.cams', card);
+          const tabsCats = qs('.tabs.cats', card);
+          const player = qs('.player', card);
+
+          function renderPlayer(){
+            const src = videoSrcFor(rec, currentCat(), activeCam);
+            if(!src){
+              player.innerHTML = `<div class="card" style="background:#0c1222;border:1px dashed #2b3a60">No video for <strong>${currentCat()}</strong> • <strong>${activeCam}</strong></div>`;
+              return;
+            }
+            player.innerHTML = `
+              <video controls preload="metadata" poster="" src="${src}"></video>
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--muted);font-size:12px">
+                <span>${currentCat()} • ${activeCam}</span>
+                <a href="${src}" download>download</a>
+              </div>`;
+          }
+
+          function currentCat(){
+            const active = qsa('.tab', tabsCats).find(t=>t.classList.contains('active'));
+            return active?.dataset.cat || 'camera';
+          }
+
+          function renderCamTabs(){
+            tabsCams.innerHTML = (camFilter==='all' ? (data.cameras||[]) : [camFilter])
+              .map(c=>`<button class="tab ${c===activeCam?'active':''}" data-cam="${c}">${c}</button>`).join('');
+            qsa('.tab', tabsCams).forEach(btn=>btn.addEventListener('click',()=>{ activeCam = btn.dataset.cam; renderCamTabs(); renderPlayer(); }));
+          }
+
+          // wire category tabs
+          qsa('.tab', tabsCats).forEach(btn=>btn.addEventListener('click',()=>{
+            qsa('.tab', tabsCats).forEach(b=>b.classList.remove('active'));
+            btn.classList.add('active');
+            renderPlayer();
+          }));
+
+          renderCamTabs();
+          renderPlayer();
+          gallery.appendChild(card);
+        });
+    }
+
+    function wireControls(data){
+      ['search','cameraFilter','categoryFilter'].forEach(id=>{
+        qs('#'+id).addEventListener('input',()=>renderGallery(data));
+        qs('#'+id).addEventListener('change',()=>renderGallery(data));
+      });
+    }
+
+    (async function init(){
+      const data = await loadManifest();
+      setStats(data);
+      wireControls(data);
+      renderGallery(data);
+    })();
+  </script>
+</body>
+</html>
