@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>CARLA Accident Recordings — Dataset Explorer</title>
-  <meta name="description" content="Browse and understand the CARLA accident recordings dataset. View structure, stats, and inline video examples." />
+  <meta name="description" content="Browse and understand the CARLA accident recordings dataset. View structure, scenarios, maps, driving conditions, stats, and inline video examples." />
   <style>
     :root{
       --bg:#0b0c10;--panel:#111319;--panel-2:#151826;--text:#e8ecf1;--muted:#b5bfd1;--brand:#6aa9ff;--accent:#8bffcd;--warn:#ffcc6a;
@@ -12,20 +12,21 @@
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;line-height:1.5;background:linear-gradient(180deg,#0a0b10,#0c0f17 40%,#0b0c10);
-      color:var(--text)}
+    body{margin:0;font-family:ui-sans-serif,system-ui,Segoe UI,Roboto,Helvetica,Arial;line-height:1.5;background:linear-gradient(180deg,#0a0b10,#0c0f17 40%,#0b0c10);color:var(--text)}
     a{color:var(--brand);text-decoration:none} a:hover{text-decoration:underline}
     header{position:sticky;top:0;background:rgba(10,12,16,.7);backdrop-filter:blur(10px);z-index:50;border-bottom:1px solid #1d2230}
-    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .wrap{max-width:1200px;margin:0 auto;padding:20px}
     .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:center}
     .card{background:linear-gradient(180deg,var(--panel),var(--panel-2));border:1px solid #1b2130;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
     .title{font-size:clamp(22px,3vw,36px);margin:8px 0 6px}
     .subtitle{color:var(--muted);margin:0}
     .badge{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border-radius:999px;background:#0f1422;border:1px solid #212a42;font-size:12px;color:var(--muted)}
     .grid{display:grid;gap:16px}
-    .grid.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .grid.stats{grid-template-columns:repeat(5,minmax(0,1fr))}
     .grid.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}
-    @media (max-width:900px){.hero{grid-template-columns:1fr}.grid.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.gallery{grid-template-columns:1fr}}
+    .grid.maps{grid-template-columns:repeat(3,minmax(0,1fr))}
+    @media (max-width:1100px){.grid.stats{grid-template-columns:repeat(3,minmax(0,1fr))}.grid.maps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media (max-width:900px){.hero{grid-template-columns:1fr}.grid.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.grid.gallery{grid-template-columns:1fr}.grid.maps{grid-template-columns:1fr}}
 
     .stat{padding:14px}
     .stat .n{font-size:24px;font-weight:700}
@@ -41,17 +42,23 @@
     pre{background:#0e1321;border:1px solid #1d2740;border-radius:12px;padding:12px;overflow:auto}
     code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:13px}
 
-    .rec{display:grid;grid-template-columns:220px 1fr;gap:14px}
-    @media (max-width:700px){.rec{grid-template-columns:1fr}}
+    .rec{display:grid;grid-template-columns:260px 1fr;gap:14px}
+    @media (max-width:760px){.rec{grid-template-columns:1fr}}
     .rec-aside{display:flex;flex-direction:column;gap:8px}
-    .rec h3{margin:0 0 4px}
+    .rec h3{margin:0 0 6px}
     .pill{display:inline-flex;align-items:center;gap:6px;background:#0f1a2a;border:1px solid #20304d;color:var(--muted);font-size:11px;border-radius:999px;padding:5px 8px}
 
     .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
     .tab{padding:6px 10px;border-radius:999px;border:1px solid #263552;background:#0e1321;color:var(--muted);cursor:pointer}
     .tab.active{background:#1a2440;color:var(--text);border-color:#37528a}
 
+    .video-wrap{display:grid;gap:8px}
     video{width:100%;border-radius:12px;border:1px solid #192744;background:#0a0e17}
+    .summary{background:#0e1321;border:1px solid #1d2740;border-radius:12px;padding:12px;color:#c9d2e4;font-size:14px}
+    .summary h4{margin:0 0 6px;font-size:14px;color:#9fb4e8}
+
+    .kv{display:grid;grid-template-columns:130px 1fr;gap:8px;font-size:13px;color:#b5bfd1}
+    .kv .k{color:#8fa1c8}
 
     footer{color:#99a4b7;padding:40px 0}
   </style>
@@ -64,10 +71,12 @@
         <strong id="ds-title">CARLA Accident Recordings</strong>
       </div>
       <div class="controls">
-        <input id="search" type="search" placeholder="Search REC id or note…" />
-        <select id="cameraFilter" title="Camera">
-          <option value="all">All cameras</option>
-        </select>
+        <input id="search" type="search" placeholder="Search REC, notes, scenario…" />
+        <select id="mapFilter" title="Map"><option value="all">All maps</option></select>
+        <select id="scenarioFilter" title="Scenario"><option value="all">All scenarios</option></select>
+        <select id="weatherFilter" title="Weather"><option value="all">All weather</option></select>
+        <select id="timeFilter" title="Time of day"><option value="all">All times</option></select>
+        <select id="cameraFilter" title="Camera"><option value="all">All cameras</option></select>
         <select id="categoryFilter" title="Category">
           <option value="camera">camera (RGB)</option>
           <option value="semseg">semseg</option>
@@ -81,13 +90,14 @@
     <section class="hero">
       <div class="card">
         <h1 class="title" id="hero-title">CARLA Accident Recordings</h1>
-        <p class="subtitle" id="hero-desc">A small sample dataset recorded in CARLA with multi-camera views (front, front_left, front_right), semantic segmentation, and optional overlay renders. Explore the structure, stats, and watch inline examples.</p>
+        <p class="subtitle" id="hero-desc">A dataset recorded in CARLA with multi-camera views (front, front_left, front_right), semantic segmentation, and optional overlays. This site explains scenarios, maps, and driving conditions and shows full per-video summaries.</p>
         <div style="height:10px"></div>
         <div class="grid stats">
           <div class="card stat"><div class="n" id="n-recs">–</div><div class="k">recordings</div></div>
           <div class="card stat"><div class="n" id="n-cams">–</div><div class="k">cameras</div></div>
           <div class="card stat"><div class="n" id="n-events">–</div><div class="k">events files</div></div>
           <div class="card stat"><div class="n" id="n-size">–</div><div class="k">media files (linked)</div></div>
+          <div class="card stat"><div class="n" id="n-scenarios">–</div><div class="k">scenario types</div></div>
         </div>
       </div>
       <div class="card">
@@ -113,25 +123,39 @@
   signals_and_intersections.json
 </code></pre>
         <details>
-          <summary>Manifest schema used by this site</summary>
+          <summary>Manifest schema used by this site (extended)</summary>
 <pre><code>{
   "dataset_title": "CARLA Accident Recordings",
   "description": "...",
+  "about": "...",
   "cameras": ["front", "front_left", "front_right"],
+  "maps": [
+    {"id":"Town05","name":"Town05","description":"Four-lane urban grid with complex intersections"}
+  ],
+  "scenario_glossary": [
+    {"id":"rear_end","name":"Rear-end collision","description":"Ego is struck from behind or strikes a lead vehicle."}
+  ],
   "recordings": [
     {
       "id": "REC_1",
       "date": "2025-08-01",
-      "notes": "optional",
-      "events_count": 0,
+      "map": "Town05",
+      "scenario": ["rear_end","pedestrian_crossing"],
+      "conditions": {"weather":"Rain","timeofday":"Night","traffic":"Dense","speed_kph":35},
+      "summary": "Session-level narrative about what happens across the run.",
       "videos": {
         "camera": {"front": "media/REC_1/camera/front.mp4", "front_left": "…", "front_right": "…"},
         "semseg": {"front": "…"},
         "overlays": {"front": "…"}
+      },
+      "video_summaries": {
+        "camera": {"front": "Full description of the RGB front view."},
+        "semseg": {"front": "What the segmentation shows and key objects."}
       }
     }
   ]
-}</code></pre>
+}
+</code></pre>
         </details>
       </div>
     </section>
@@ -139,16 +163,33 @@
     <section class="card">
       <div style="display:flex;align-items:center;gap:10px;justify-content:space-between">
         <h2 style="margin:0">Recordings</h2>
-        <span class="badge" id="active-filters">All cameras • camera</span>
+        <span class="badge" id="active-filters">All maps • All scenarios • All weather • All times • All cameras • camera</span>
       </div>
       <div class="grid gallery" id="gallery"></div>
     </section>
 
     <section class="card">
+      <h2 style="margin:0 0 6px">Scenarios & labels glossary</h2>
+      <p class="subtitle">This section explains scenario tags used across the dataset (e.g., rear_end, cut_in, red_light_violation, pedestrian_crossing).</p>
+      <div id="scenario-glossary" class="grid maps"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 6px">Maps used in CARLA</h2>
+      <p class="subtitle">All towns/maps that appear in this dataset with descriptions. If you include a <code>maps</code> array in your manifest, its descriptions are shown here; otherwise we derive the list from recordings.</p>
+      <div id="maps-list" class="grid maps"></div>
+    </section>
+
+    <section class="card">
+      <h2 style="margin:0 0 6px">Driving situations summary</h2>
+      <div class="kv"><div class="k">Weather</div><div id="agg-weather">–</div></div>
+      <div class="kv"><div class="k">Time of day</div><div id="agg-time">–</div></div>
+      <div class="kv"><div class="k">Traffic density</div><div id="agg-traffic">–</div></div>
+    </section>
+
+    <section class="card">
       <h2 style="margin:0 0 6px">About this dataset</h2>
-      <p id="about">
-        These recordings are organized for a perception pipeline: RGB camera videos in <code>videos/camera</code>, semantic segmentation videos in <code>videos/semseg</code>, and optional render outputs in <code>videos/overlays</code>. Per-camera JSON object tracks are under <code>json/semseg_objects/&lt;camera&gt;</code>. Summaries exist per camera and at session level. The site reads a simple JSON manifest to display examples inline.
-      </p>
+      <p id="about">RGB camera videos in <code>videos/camera</code>, semantic segmentation videos in <code>videos/semseg</code>, and optional renders in <code>videos/overlays</code>. Per-camera JSON tracks live under <code>json/semseg_objects/&lt;camera&gt;</code>. This site now supports per-session and per-video summaries, scenario tags, map descriptions, and condition filters.</p>
       <ul>
         <li><strong>Tip:</strong> keep web examples small (≤ ~50 MB per file). Use <code>preload="metadata"</code> on videos for snappy loads.</li>
         <li><strong>GitHub Pages:</strong> put this <code>index.html</code> and your <code>data_manifest.json</code> in <code>/docs</code> of your repo; enable Pages → "Deploy from a branch" → <code>main</code> / <code>docs</code>.</li>
@@ -157,7 +198,7 @@
   </main>
 
   <footer class="wrap">
-    Built as a single-file static site. You can customize text via <code>data_manifest.json</code>.
+    Built as a single-file static site. Customize content via <code>data_manifest.json</code>.
   </footer>
 
   <script>
@@ -168,24 +209,46 @@
       dataset_title: "CARLA Accident Recordings",
       description: "Sample viewer for CARLA accident recordings with multi-camera videos.",
       cameras: ["front","front_left","front_right"],
+      maps: [
+        { id:"Town05", name:"Town05", description:"Urban grid with multiple intersections and traffic lights." },
+        { id:"Town03", name:"Town03", description:"Curvy suburban roads with roundabouts." }
+      ],
+      scenario_glossary: [
+        { id:"rear_end", name:"Rear-end collision", description:"Lead vehicle decelerates or stops; following vehicle fails to maintain distance." },
+        { id:"cut_in", name:"Cut-in / lane change", description:"Another vehicle merges into ego lane at close range." },
+        { id:"red_light_violation", name:"Red-light violation", description:"A vehicle enters an intersection on red causing conflict." },
+        { id:"pedestrian_crossing", name:"Pedestrian crossing", description:"Pedestrian appears at crosswalk or occluded curb." }
+      ],
       recordings: [
         {
           id: "REC_DEMO_1", date: "2025-08-01", notes: "demo entry",
-          events_count: 0,
+          map: "Town05",
+          scenario: ["rear_end"],
+          conditions: { weather: "ClearNoon", timeofday: "Day", traffic: "Moderate", speed_kph: 40 },
+          summary: "Ego follows a slow lead car; abrupt stop leads to a near rear-end at a signalized intersection.",
           videos: {
             camera: {
               front: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             },
             semseg: {}, overlays: {}
+          },
+          video_summaries: {
+            camera: { front: "Front RGB shows lead vehicle brake lights at t=07s; ego braking response and ABS activation." }
           }
         },
         {
           id: "REC_DEMO_2", date: "2025-08-02", notes: "demo entry",
-          events_count: 0,
+          map: "Town03",
+          scenario: ["pedestrian_crossing"],
+          conditions: { weather: "Rain", timeofday: "Night", traffic: "Sparse", speed_kph: 30 },
+          summary: "Night rain with reduced visibility; pedestrian emerges from occlusion at roundabout entry.",
           videos: {
             camera: {
               front: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
             }, semseg: {}, overlays: {}
+          },
+          video_summaries: {
+            camera: { front: "Pedestrian outlines visible in headlight cone; reflections and glare present." }
           }
         }
       ]
@@ -204,33 +267,59 @@
       }
     }
 
+    function uniq(arr){ return Array.from(new Set(arr.filter(Boolean))); }
+    function byCount(arr){ const m=new Map(); arr.forEach(x=>m.set(x,(m.get(x)||0)+1)); return Array.from(m.entries()).sort((a,b)=>b[1]-a[1]); }
+
     function setStats(data){
       qs('#ds-title').textContent = data.dataset_title || 'Dataset Explorer';
       qs('#hero-title').textContent = data.dataset_title || 'Dataset Explorer';
       qs('#hero-desc').textContent = data.description || qs('#hero-desc').textContent;
       qs('#about').textContent = data.about || qs('#about').textContent;
 
-      const nRecs = data.recordings?.length || 0;
+      const recs = data.recordings || [];
       const cameras = data.cameras || [];
-      const nEvents = data.recordings?.reduce((a,r)=>a+(r.events_count||0),0) || 0;
-      const nMedia = data.recordings?.reduce((a,r)=>{
-        const v = r.videos || {}; let c=0;
-        Object.values(v).forEach(map=>{ if(map && typeof map === 'object') c += Object.values(map).filter(Boolean).length });
-        return a + c;
-      },0) || 0;
+      const nRecs = recs.length;
+      const nEvents = recs.reduce((a,r)=>a+(r.events_count||0),0) || 0;
+      const nMedia = recs.reduce((a,r)=>{ const v=r.videos||{}; let c=0; Object.values(v).forEach(map=>{ if(map && typeof map==='object') c+= Object.values(map).filter(Boolean).length }); return a+c; },0) || 0;
+      const scenarioSet = uniq(recs.flatMap(r=>r.scenario||[]));
 
       qs('#n-recs').textContent = nRecs;
       qs('#n-cams').textContent = cameras.length || '–';
       qs('#n-events').textContent = nEvents;
       qs('#n-size').textContent = nMedia;
+      qs('#n-scenarios').textContent = scenarioSet.length || '–';
 
-      // camera filter options
-      const sel = qs('#cameraFilter');
-      sel.innerHTML = '<option value="all">All cameras</option>' + cameras.map(c=>`<option value="${c}">${c}</option>`).join('');
+      // populate filters
+      const mapsFromManifest = (data.maps||[]).map(m=>m.id);
+      const mapsFromRecs = uniq(recs.map(r=>r.map));
+      setSelect('#mapFilter', ['all', ...uniq([...mapsFromManifest, ...mapsFromRecs])]);
+      setSelect('#scenarioFilter', ['all', ...scenarioSet]);
+      setSelect('#weatherFilter', ['all', ...uniq(recs.map(r=>r.conditions?.weather))]);
+      setSelect('#timeFilter', ['all', ...uniq(recs.map(r=>r.conditions?.timeofday))]);
+
+      const camSel = qs('#cameraFilter');
+      camSel.innerHTML = '<option value="all">All cameras</option>' + cameras.map(c=>`<option value="${c}">${c}</option>`).join('');
     }
 
-    function videoSrcFor(rec, category, camera){
-      return rec?.videos?.[category]?.[camera] || '';
+    function setSelect(sel, options){
+      const el = typeof sel==='string'? qs(sel): sel;
+      const html = options.map(v=>`<option value="${v}">${v==='all'?`All ${el.title||'items'}`:v}</option>`).join('');
+      el.innerHTML = html;
+    }
+
+    function videoSrcFor(rec, category, camera){ return rec?.videos?.[category]?.[camera] || ''; }
+    function videoSummaryFor(rec, category, camera){ return rec?.video_summaries?.[category]?.[camera] || ''; }
+
+    function matchesFilters(rec){
+      const mapF = qs('#mapFilter').value;
+      const scenF = qs('#scenarioFilter').value;
+      const weatF = qs('#weatherFilter').value;
+      const timeF = qs('#timeFilter').value;
+      if(mapF !== 'all' && (rec.map||'') !== mapF) return false;
+      if(scenF !== 'all' && !(rec.scenario||[]).includes(scenF)) return false;
+      if(weatF !== 'all' && (rec.conditions?.weather||'') !== weatF) return false;
+      if(timeF !== 'all' && (rec.conditions?.timeofday||'') !== timeF) return false;
+      return true;
     }
 
     function renderGallery(data){
@@ -239,14 +328,22 @@
       const searchTerm = qs('#search').value.trim().toLowerCase();
       const camFilter = qs('#cameraFilter').value;
       const catFilter = qs('#categoryFilter').value;
-      qs('#active-filters').textContent = `${camFilter==='all'?'All cameras':camFilter} • ${catFilter}`;
 
-      data.recordings
-        .filter(r => !searchTerm || (r.id?.toLowerCase().includes(searchTerm) || r.notes?.toLowerCase().includes(searchTerm)))
+      const activeText = [
+        (qs('#mapFilter').value==='all'? 'All maps':qs('#mapFilter').value),
+        (qs('#scenarioFilter').value==='all'? 'All scenarios':qs('#scenarioFilter').value),
+        (qs('#weatherFilter').value==='all'? 'All weather':qs('#weatherFilter').value),
+        (qs('#timeFilter').value==='all'? 'All times':qs('#timeFilter').value),
+        (camFilter==='all'? 'All cameras':camFilter),
+        catFilter
+      ].join(' • ');
+      qs('#active-filters').textContent = activeText;
+
+      (data.recordings||[])
+        .filter(r => !searchTerm || [r.id, r.notes, r.summary, (r.scenario||[]).join(' ')].filter(Boolean).join(' ').toLowerCase().includes(searchTerm))
+        .filter(matchesFilters)
         .forEach(rec => {
           const cameras = camFilter==='all' ? (data.cameras || []) : [camFilter];
-
-          // pick first available camera with a source for this category to show by default
           let activeCam = cameras.find(c => videoSrcFor(rec, catFilter, c)) || cameras[0] || '';
 
           const card = document.createElement('div');
@@ -255,8 +352,11 @@
             <aside class="rec-aside">
               <h3>${rec.id}</h3>
               <span class="pill">${rec.date || ''}</span>
-              <span class="pill">events: ${rec.events_count ?? '–'}</span>
-              ${rec.notes ? `<span class="pill" title="notes">${rec.notes}</span>`: ''}
+              ${rec.map ? `<span class="pill">map: ${rec.map}</span>`:''}
+              ${rec.conditions?.weather ? `<span class="pill">weather: ${rec.conditions.weather}</span>`:''}
+              ${rec.conditions?.timeofday ? `<span class="pill">time: ${rec.conditions.timeofday}</span>`:''}
+              ${rec.conditions?.traffic ? `<span class="pill">traffic: ${rec.conditions.traffic}</span>`:''}
+              ${(rec.scenario||[]).map(s=>`<span class="pill">${s}</span>`).join('')}
               <div class="tabs cams"></div>
             </aside>
             <div>
@@ -265,25 +365,35 @@
                   <button class="tab ${cat===catFilter?'active':''}" data-cat="${cat}">${cat}</button>
                 `).join('')}
               </div>
-              <div class="player"></div>
+              <div class="video-wrap">
+                <div class="player"></div>
+                <div class="summary" aria-live="polite">
+                  <h4>Summary</h4>
+                  <div class="text">${rec.summary||'No session summary provided yet.'}</div>
+                </div>
+              </div>
             </div>`;
 
           const tabsCams = qs('.tabs.cams', card);
           const tabsCats = qs('.tabs.cats', card);
           const player = qs('.player', card);
+          const summaryBox = qs('.summary .text', card);
 
           function renderPlayer(){
             const src = videoSrcFor(rec, currentCat(), activeCam);
+            const vidSummary = videoSummaryFor(rec, currentCat(), activeCam);
             if(!src){
               player.innerHTML = `<div class="card" style="background:#0c1222;border:1px dashed #2b3a60">No video for <strong>${currentCat()}</strong> • <strong>${activeCam}</strong></div>`;
+              summaryBox.textContent = rec.summary || 'No session summary provided yet.';
               return;
             }
             player.innerHTML = `
-              <video controls preload="metadata" poster="" src="${src}"></video>
+              <video controls preload="metadata" src="${src}"></video>
               <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--muted);font-size:12px">
                 <span>${currentCat()} • ${activeCam}</span>
                 <a href="${src}" download>download</a>
               </div>`;
+            summaryBox.textContent = vidSummary || rec.summary || 'No summary provided yet.';
           }
 
           function currentCat(){
@@ -297,7 +407,6 @@
             qsa('.tab', tabsCams).forEach(btn=>btn.addEventListener('click',()=>{ activeCam = btn.dataset.cam; renderCamTabs(); renderPlayer(); }));
           }
 
-          // wire category tabs
           qsa('.tab', tabsCats).forEach(btn=>btn.addEventListener('click',()=>{
             qsa('.tab', tabsCats).forEach(b=>b.classList.remove('active'));
             btn.classList.add('active');
@@ -310,10 +419,45 @@
         });
     }
 
+    function renderScenarioGlossary(data){
+      const root = qs('#scenario-glossary');
+      root.innerHTML = '';
+      const items = data.scenario_glossary && data.scenario_glossary.length ? data.scenario_glossary : uniq((data.recordings||[]).flatMap(r=>r.scenario||[])).map(id=>({id, name:id, description:""}));
+      items.forEach(s=>{
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<strong>${s.name||s.id}</strong><p class="subtitle" style="margin-top:6px">${s.description||'—'}</p>`;
+        root.appendChild(el);
+      });
+    }
+
+    function renderMaps(data){
+      const root = qs('#maps-list');
+      root.innerHTML = '';
+      const recMaps = byCount((data.recordings||[]).map(r=>r.map).filter(Boolean));
+      const dict = new Map((data.maps||[]).map(m=>[m.id,m]));
+      recMaps.forEach(([id,count])=>{
+        const meta = dict.get(id) || {id, name:id, description:''};
+        const el = document.createElement('div');
+        el.className = 'card';
+        el.innerHTML = `<strong>${meta.name||id}</strong><div class="subtitle">${count} recording(s)</div><p style="margin-top:6px">${meta.description||'No description provided yet.'}</p>`;
+        root.appendChild(el);
+      });
+    }
+
+    function renderDrivingAggregates(data){
+      const recs = data.recordings||[];
+      const w = byCount(recs.map(r=>r.conditions?.weather).filter(Boolean)).map(([k,c])=>`${k}: ${c}`).join(', ') || '—';
+      const t = byCount(recs.map(r=>r.conditions?.timeofday).filter(Boolean)).map(([k,c])=>`${k}: ${c}`).join(', ') || '—';
+      const tr = byCount(recs.map(r=>r.conditions?.traffic).filter(Boolean)).map(([k,c])=>`${k}: ${c}`).join(', ') || '—';
+      qs('#agg-weather').textContent = w; qs('#agg-time').textContent = t; qs('#agg-traffic').textContent = tr;
+    }
+
     function wireControls(data){
-      ['search','cameraFilter','categoryFilter'].forEach(id=>{
-        qs('#'+id).addEventListener('input',()=>renderGallery(data));
-        qs('#'+id).addEventListener('change',()=>renderGallery(data));
+      ['search','cameraFilter','categoryFilter','mapFilter','scenarioFilter','weatherFilter','timeFilter'].forEach(id=>{
+        const el = qs('#'+id);
+        el.addEventListener('input',()=>renderGallery(data));
+        el.addEventListener('change',()=>renderGallery(data));
       });
     }
 
@@ -322,6 +466,9 @@
       setStats(data);
       wireControls(data);
       renderGallery(data);
+      renderScenarioGlossary(data);
+      renderMaps(data);
+      renderDrivingAggregates(data);
     })();
   </script>
 </body>
